@@ -1,0 +1,246 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  color: #fff;
+}
+
+h1 {
+  margin-bottom: 10px;
+  font-size: 2rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+  color: #aaa;
+  margin-bottom: 20px;
+}
+
+.game-container {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.canvas-container {
+  background: #0a0a1a;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+canvas {
+  border-radius: 10px;
+  display: block;
+}
+
+.controls-panel {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 25px;
+  width: 350px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.control-section {
+  margin-bottom: 25px;
+}
+
+.control-section h3 {
+  color: #4fc3f7;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  border-bottom: 2px solid rgba(79, 195, 247, 0.3);
+  padding-bottom: 8px;
+}
+
+.ball-control {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.ball-control h4 {
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.ball-control.ball-a h4 {
+  color: #ff6b6b;
+}
+
+.ball-control.ball-b h4 {
+  color: #4ecdc4;
+}
+
+.input-group {
+  margin-bottom: 12px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.input-group input[type="range"] {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.input-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #4fc3f7;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.input-group input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.value-display {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #4fc3f7;
+  margin-top: 3px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-start {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  color: #fff;
+}
+
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(78, 205, 196, 0.4);
+}
+
+.btn-reset {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+  color: #fff;
+}
+
+.btn-reset:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+}
+
+.btn-pause {
+  background: linear-gradient(135deg, #ffd93d 0%, #f9c846 100%);
+  color: #333;
+}
+
+.btn-pause:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 217, 61, 0.4);
+}
+
+.info-panel {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 15px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  color: #aaa;
+}
+
+.info-value {
+  font-weight: 600;
+  font-family: "Courier New", monospace;
+}
+
+.info-value.ball-a {
+  color: #ff6b6b;
+}
+
+.info-value.ball-b {
+  color: #4ecdc4;
+}
+
+.formula {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 15px;
+  font-family: "Courier New", monospace;
+  font-size: 0.85rem;
+  color: #ffd93d;
+  text-align: center;
+}
+
+.mode-select {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mode-btn.active {
+  border-color: #4fc3f7;
+  background: rgba(79, 195, 247, 0.2);
+}
+
+.mode-btn:hover {
+  border-color: #4fc3f7;
+}
