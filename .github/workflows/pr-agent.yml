@@ -24,3 +24,4 @@ jobs:
         env:
           OPENROUTER__KEY: ${{ secrets.OPENROUTER__KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONFIG.MODEL: ${{ secrets.AI_MODEL }}
