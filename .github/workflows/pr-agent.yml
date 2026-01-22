@@ -22,7 +22,7 @@ jobs:
         id: pragent
         uses: qodo-ai/pr-agent@main
         env:
-          OPENROUTER__KEY: ${{ secrets.OPENROUTER__KEY }}
+          OPENROUTER.KEY: ${{ secrets.OPENROUTER__KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           config.model: ${{ secrets.AI_MODEL }}
           config.fallback_models: "[${{ secrets.AI_FALLBACK_MODELS }}]"
