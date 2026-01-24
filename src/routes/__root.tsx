@@ -1,7 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-
+import Footer from '@/components/ui/footer'
 
 import appCss from '../styles.css?url'
 
@@ -16,7 +16,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Physics Simulator',
       },
     ],
     links: [
@@ -36,8 +36,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
-        {children}
+      <body className="min-h-screen flex flex-col">
+        <div className="flex-1">
+          {children}
+        </div>
+        <Footer />
         <TanStackDevtools
           config={{
             position: 'bottom-right',
