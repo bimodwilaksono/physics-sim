@@ -33,5 +33,5 @@ export const ARROW_COLOR = "#e74c3c";
 /** Warna teks label pada bola */
 export const TEXT_COLOR = "#fff";
 
-/** Font untuk teks label */
-export const TEXT_FONT = "14px Arial";
+/** Font untuk teks label (pixel style) */
+export const TEXT_FONT = '"Press Start 2P", monospace';
