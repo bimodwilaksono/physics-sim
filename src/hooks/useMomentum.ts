@@ -1,41 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-/** Konfigurasi bola: massa, kecepatan, dan radius */
-export interface BallConfig {
-	mass: number;
-	velocity: number;
-	radius: number;
-}
+import {
+	ARROW_COLOR,
+	ARROW_HEAD_ANGLE,
+	ARROW_HEAD_LENGTH,
+	ARROW_LENGTH_MULTIPLIER,
+	BALL_A_COLOR,
+	BALL_B_COLOR,
+	ELASTIC_RESTITUTION,
+	FLOOR_OFFSET,
+	INELASTIC_RESTITUTION,
+	STROKE_COLOR,
+	TEXT_COLOR,
+	TEXT_FONT,
+} from "@/lib/constants";
 
-/** State lengkap bola termasuk posisi dan warna */
-export interface BallState extends BallConfig {
-	x: number;
-	y: number;
-	color: string;
-}
-
-/** Data fisika: momentum dan energi kinetik */
-export interface PhysicsData {
-	momentum: number;
-	kineticEnergy: number;
-}
-
-/** Param untuk hooks useMomentum */
-export interface UseMomentumOptions {
-	canvasWidth: number;
-	canvasHeight: number;
-	initialBallA: BallConfig;
-	initialBallB: BallConfig;
-	ballAY?: number;
-	ballBY?: number;
-}
-
-/** Konstanta fisika dan tampilan */
-const ELASTIC_RESTITUTION = 0.95; // Koefisien restitusi untuk tumbukan elastis
-const INELASTIC_RESTITUTION = 0; // Koefisien restitusi untuk tumbukan tidak elastis
-const BALL_A_COLOR = "#ff6b6b"; // Warna bola A (merah)
-const BALL_B_COLOR = "#4ecdc4"; // Warna bola B (cyan)
-const FLOOR_OFFSET = 60; // Jarak garis lantai dari tengah canvas
+import type {
+	BallConfig,
+	BallState,
+	PhysicsData,
+	UseMomentumOptions,
+} from "@/lib/types";
 
 /**
  * Mendeteksi apakah dua bola bersentuhan
@@ -125,7 +110,7 @@ function drawFloor(
 	canvasWidth: number,
 	canvasHeight: number,
 ): void {
-	ctx.strokeStyle = "#333";
+	ctx.strokeStyle = STROKE_COLOR;
 	ctx.lineWidth = 2;
 	ctx.beginPath();
 	ctx.moveTo(50, canvasHeight / 2 + FLOOR_OFFSET);
@@ -144,45 +129,47 @@ function drawBall(ctx: CanvasRenderingContext2D, ball: BallState): void {
 	ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
 	ctx.fillStyle = ball.color;
 	ctx.fill();
-	ctx.strokeStyle = "#333";
+	ctx.strokeStyle = STROKE_COLOR;
 	ctx.lineWidth = 2;
 	ctx.stroke();
 	ctx.closePath();
 
 	// Gambar panah kecepatan
-	const arrowLength = ball.velocity * 10;
+	const arrowLength = ball.velocity * ARROW_LENGTH_MULTIPLIER;
 	if (Math.abs(arrowLength) > 1) {
 		ctx.beginPath();
 		ctx.moveTo(ball.x, ball.y);
 		ctx.lineTo(ball.x + arrowLength, ball.y);
-		ctx.strokeStyle = "#e74c3c";
+		ctx.strokeStyle = ARROW_COLOR;
 		ctx.lineWidth = 3;
 		ctx.stroke();
 
 		// Kepala panah
-		const headLen = 10;
 		const direction = ball.velocity > 0 ? 1 : -1;
-		const baseAngle = Math.PI / 6; // 30° dari garis utama
 
 		ctx.beginPath();
 		// Garis pertama kepala panah
 		ctx.moveTo(ball.x + arrowLength, ball.y);
 		ctx.lineTo(
-			ball.x + arrowLength - direction * headLen * Math.cos(baseAngle),
-			ball.y - headLen * Math.sin(baseAngle),
+			ball.x +
+				arrowLength -
+				direction * ARROW_HEAD_LENGTH * Math.cos(ARROW_HEAD_ANGLE),
+			ball.y - ARROW_HEAD_LENGTH * Math.sin(ARROW_HEAD_ANGLE),
 		);
 		// Garis kedua kepala panah
 		ctx.moveTo(ball.x + arrowLength, ball.y);
 		ctx.lineTo(
-			ball.x + arrowLength - direction * headLen * Math.cos(baseAngle),
-			ball.y + headLen * Math.sin(baseAngle),
+			ball.x +
+				arrowLength -
+				direction * ARROW_HEAD_LENGTH * Math.cos(ARROW_HEAD_ANGLE),
+			ball.y + ARROW_HEAD_LENGTH * Math.sin(ARROW_HEAD_ANGLE),
 		);
 		ctx.stroke();
 	}
 
 	// Tampilkan label massa dan kecepatan
-	ctx.fillStyle = "#fff";
-	ctx.font = "14px Arial";
+	ctx.fillStyle = TEXT_COLOR;
+	ctx.font = TEXT_FONT;
 	ctx.textAlign = "center";
 	ctx.fillText(`m: ${ball.mass}kg`, ball.x, ball.y - ball.radius - 15);
 	ctx.fillText(
