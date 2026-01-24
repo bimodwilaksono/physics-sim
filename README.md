@@ -1,6 +1,24 @@
-# 🎱 Physics Simulator
+# Physics Simulator
 
 An interactive web-based physics simulation application built with modern React technologies. Explore the fascinating world of physics through hands-on experiments with collision momentum, elastic and inelastic collisions.
+
+## 📑 Table of Contents
+
+- [📖 Description](#-description)
+- [✨ Features](#-features)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [🚀 Getting Started](#-getting-started)
+- [📜 Available Scripts](#-available-scripts)
+- [🏗️ Building for Production](#️-building-for-production)
+- [🧪 Testing](#-testing)
+- [🎨 Styling](#-styling)
+- [📁 Project Structure](#-project-structure)
+- [🔧 Configuration](#-configuration)
+- [🧮 Physics Implementation](#-physics-implementation)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [🙏 Acknowledgments](#-acknowledgments)
+- [📞 Contact](#-contact)
 
 ## 📖 Description
 
@@ -19,21 +37,23 @@ The application features a clean, intuitive interface with a welcome screen, sim
 - **Adjustable Parameters**: Modify mass, velocity, and radius of colliding objects
 - **Collision Modes**: Toggle between elastic and inelastic collisions
 - **Live Data Display**: Real-time momentum and kinetic energy calculations
+- **Chart Visualization**: Track momentum and energy changes over time with interactive charts
 - **Responsive Design**: Works on desktop and mobile devices
 - **Modern UI**: Built with Tailwind CSS and custom components
 - **Educational Focus**: Designed for physics learning and experimentation
 
 ## 🛠️ Tech Stack
 
-- **Frontend Framework**: React 18 with TypeScript
+- **Frontend Framework**: React 19 with TypeScript
 - **Routing**: TanStack Router (file-based routing)
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS v4
 - **Icons**: Lucide React
 - **Build Tool**: Vite
 - **Runtime**: Bun
 - **Linting/Formatting**: Biome
 - **Testing**: Vitest
 - **UI Components**: Custom pixelact-ui component library
+- **Charts**: Recharts
 
 ## 🚀 Getting Started
 
@@ -80,7 +100,7 @@ To create a production build:
 bun run build
 ```
 
-The built files will be in the `dist` directory, ready for deployment.
+The built files will be in the `.output` directory, ready for deployment.
 
 ## 🧪 Testing
 
@@ -92,7 +112,7 @@ bun run test
 
 ## 🎨 Styling
 
-The project uses Tailwind CSS for styling. Custom styles are in `src/styles.css`, and component-specific styles are in their respective files.
+The project uses Tailwind CSS v4 for styling. Custom styles are in `src/styles.css`, and component-specific styles are in their respective files.
 
 ## 📁 Project Structure
 
@@ -104,11 +124,20 @@ src/
 │   │   ├── footer.tsx         # Footer component
 │   │   ├── info-row.tsx       # Data display component
 │   │   └── input-range.tsx    # Range input component
+│   └── momentum-chart.tsx     # Momentum/energy chart component
 ├── routes/
 │   ├── __root.tsx            # Root layout
 │   ├── index.tsx             # Welcome page
 │   └── simulator/
 │       └── momentum.tsx      # Momentum simulator
+├── hooks/
+│   └── useMomentum.ts        # Main physics simulation hook
+├── lib/
+│   ├── constants.ts          # Physics and UI constants
+│   ├── types.ts              # TypeScript type definitions
+│   ├── physics.ts            # Physics calculation functions
+│   ├── canvas.ts             # Canvas drawing functions
+│   └── utils.ts              # Utility functions
 └── styles.css                # Global styles
 ```
 
@@ -117,7 +146,23 @@ src/
 - **TypeScript**: `tsconfig.json`
 - **Vite**: `vite.config.ts`
 - **Biome**: `biome.json`
-- **Tailwind**: Configured in `tailwind.config.js` (if exists)
+- **Tailwind**: Configured via `@tailwindcss/vite`
+
+## 🧮 Physics Implementation
+
+The simulation uses real physics formulas for collision calculations:
+
+### Elastic Collision (e = 1)
+- Momentum conserved: p₁ + p₂ = p₁' + p₂'
+- Kinetic energy conserved: KE₁ + KE₂ = KE₁' + KE₂'
+
+### Inelastic Collision (0 ≤ e < 1)
+- Momentum conserved: p₁ + p₂ = p₁' + p₂'
+- Kinetic energy partially lost based on restitution coefficient
+
+### Perfectly Inelastic Collision (e = 0)
+- Objects stick together and move with common velocity
+- v_final = (m₁v₁ + m₂v₂) / (m₁ + m₂)
 
 ## 🤝 Contributing
 
@@ -135,6 +180,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built with [TanStack Router](https://tanstack.com/router)
 - Icons from [Lucide](https://lucide.dev)
+- Charts powered by [Recharts](https://recharts.org)
 - UI components inspired by modern design systems
 
 ## 📞 Contact
