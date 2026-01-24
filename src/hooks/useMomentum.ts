@@ -1,183 +1,32 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-	ARROW_COLOR,
-	ARROW_HEAD_ANGLE,
-	ARROW_HEAD_LENGTH,
-	ARROW_LENGTH_MULTIPLIER,
-	BALL_A_COLOR,
-	BALL_B_COLOR,
-	ELASTIC_RESTITUTION,
-	FLOOR_OFFSET,
-	INELASTIC_RESTITUTION,
-	STROKE_COLOR,
-	TEXT_COLOR,
-	TEXT_FONT,
-} from "@/lib/constants";
+import { BALL_A_COLOR, BALL_B_COLOR } from "@/lib/constants";
 
 import type {
 	BallConfig,
-	BallState,
-	PhysicsData,
 	UseMomentumOptions,
+	HistoryPointMomentum,
+	BallState,
 } from "@/lib/types";
 
-/**
- * Mendeteksi apakah dua bola bersentuhan
- * Menghitung jarak horizontal antara pusat kedua bola
- * @param ball1 Bola pertama
- * @param ball2 Bola kedua
- * @returns true jika jarak <= jumlah radius (bersentuhan)
- */
-function checkCollision(ball1: BallState, ball2: BallState): boolean {
-	const distance = Math.abs(ball2.x - ball1.x);
-	const minDistance = ball1.radius + ball2.radius;
-	return distance <= minDistance;
-}
+import {
+	checkCollision,
+	isOutOfBounds,
+	resolveCollision,
+	calculatePhysics,
+} from "@/lib/physics";
 
-/**
- * Mengecek apakah bola sudah keluar dari area canvas
- * @param ball Bola yang akan dicek
- * @param width Lebar canvas
- * @returns true jika bola keluar dari batas kiri/kanan
- */
-function isOutOfBounds(ball: BallState, width: number): boolean {
-	return ball.x < -ball.radius || ball.x > width + ball.radius;
-}
+import { drawFloor, drawBall } from "@/lib/canvas";
 
-/**
- * Menghitung kecepatan baru setelah tumbukan menggunakan hukum konservasi momentum
- * Untuk tumbukan elastis: menggunakan rumus standard
- * Untuk tumbukan tidak elastis: bola menyatu dengan kecepatan rata-rata
- * @param ball1 Bola pertama (velocity akan diubah)
- * @param ball2 Bola kedua (velocity akan diubah)
- * @param isElastic true untuk elastis, false untuk tidak elastis
- */
-function resolveCollision(
-	ball1: BallState,
-	ball2: BallState,
-	isElastic: boolean,
-): void {
-	const m1 = ball1.mass;
-	const m2 = ball2.mass;
-	const v1 = ball1.velocity;
-	const v2 = ball2.velocity;
-
-	// Rumus kecepatan akhir untuk tumbukan 1D
-	const v1Final = ((m1 - m2) * v1 + 2 * m2 * v2) / (m1 + m2);
-	const v2Final = ((m2 - m1) * v2 + 2 * m1 * v1) / (m1 + m2);
-
-	// Terapkan koefisien restitusi
-	const restitution = isElastic ? ELASTIC_RESTITUTION : INELASTIC_RESTITUTION;
-
-	ball1.velocity = v1Final * restitution;
-	ball2.velocity = v2Final * restitution;
-
-	// Untuk tumbukan tidak elastis sempurna, bola menyatu
-	if (!isElastic && restitution < 0.2) {
-		const combinedVelocity = (m1 * v1 + m2 * v2) / (m1 + m2);
-		ball1.velocity = combinedVelocity;
-		ball2.velocity = combinedVelocity;
-	}
-
-	// Pisahkan bola yang overlap agar tidak stuck
-	const overlap = ball1.radius + ball2.radius - Math.abs(ball2.x - ball1.x);
-	if (overlap > 0) {
-		ball1.x -= overlap / 2;
-		ball2.x += overlap / 2;
-	}
-}
-
-/**
- * Menghitung data fisika untuk satu bola
- * @param ball Bola yang akan dihitung
- * @returns Object berisi momentum (p=mv) dan energi kinetik (KE=½mv²)
- */
-function calculatePhysics(ball: BallState): PhysicsData {
-	const momentum = ball.mass * ball.velocity;
-	const kineticEnergy = 0.5 * ball.mass * ball.velocity ** 2;
-	return { momentum, kineticEnergy };
-}
-
-/**
- * Menggambar garis lantai pada canvas
- * @param ctx Context canvas 2D
- * @param canvasWidth Lebar canvas
- * @param canvasHeight Tinggi canvas
- */
-function drawFloor(
-	ctx: CanvasRenderingContext2D,
-	canvasWidth: number,
-	canvasHeight: number,
-): void {
-	ctx.strokeStyle = STROKE_COLOR;
-	ctx.lineWidth = 2;
-	ctx.beginPath();
-	ctx.moveTo(50, canvasHeight / 2 + FLOOR_OFFSET);
-	ctx.lineTo(canvasWidth - 50, canvasHeight / 2 + FLOOR_OFFSET);
-	ctx.stroke();
-}
-
-/**
- * Menggambar bola dengan panah kecepatan dan label
- * @param ctx Context canvas 2D
- * @param ball Bola yang akan digambar
- */
-function drawBall(ctx: CanvasRenderingContext2D, ball: BallState): void {
-	// Gambar lingkaran bola
-	ctx.beginPath();
-	ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-	ctx.fillStyle = ball.color;
-	ctx.fill();
-	ctx.strokeStyle = STROKE_COLOR;
-	ctx.lineWidth = 2;
-	ctx.stroke();
-	ctx.closePath();
-
-	// Gambar panah kecepatan
-	const arrowLength = ball.velocity * ARROW_LENGTH_MULTIPLIER;
-	if (Math.abs(arrowLength) > 1) {
-		ctx.beginPath();
-		ctx.moveTo(ball.x, ball.y);
-		ctx.lineTo(ball.x + arrowLength, ball.y);
-		ctx.strokeStyle = ARROW_COLOR;
-		ctx.lineWidth = 3;
-		ctx.stroke();
-
-		// Kepala panah
-		const direction = ball.velocity > 0 ? 1 : -1;
-
-		ctx.beginPath();
-		// Garis pertama kepala panah
-		ctx.moveTo(ball.x + arrowLength, ball.y);
-		ctx.lineTo(
-			ball.x +
-				arrowLength -
-				direction * ARROW_HEAD_LENGTH * Math.cos(ARROW_HEAD_ANGLE),
-			ball.y - ARROW_HEAD_LENGTH * Math.sin(ARROW_HEAD_ANGLE),
-		);
-		// Garis kedua kepala panah
-		ctx.moveTo(ball.x + arrowLength, ball.y);
-		ctx.lineTo(
-			ball.x +
-				arrowLength -
-				direction * ARROW_HEAD_LENGTH * Math.cos(ARROW_HEAD_ANGLE),
-			ball.y + ARROW_HEAD_LENGTH * Math.sin(ARROW_HEAD_ANGLE),
-		);
-		ctx.stroke();
-	}
-
-	// Tampilkan label massa dan kecepatan
-	ctx.fillStyle = TEXT_COLOR;
-	ctx.font = TEXT_FONT;
-	ctx.textAlign = "center";
-	ctx.fillText(`m: ${ball.mass}kg`, ball.x, ball.y - ball.radius - 15);
-	ctx.fillText(
-		`v: ${ball.velocity.toFixed(1)} m/s`,
-		ball.x,
-		ball.y - ball.radius - 30,
-	);
-}
+const initialHistory: HistoryPointMomentum = {
+	time: 0,
+	momentumA: 0,
+	momentumB: 0,
+	totalMomentum: 0,
+	kineticEnergyA: 0,
+	kineticEnergyB: 0,
+	totalKineticEnergy: 0,
+};
 
 /**
  * Hook utama untuk simulasi momentum
@@ -221,9 +70,15 @@ export function useMomentum(options: UseMomentumOptions) {
 	const [ballA, setBallA] = useState<BallState>(initialBallAState);
 	const [ballB, setBallB] = useState<BallState>(initialBallBState);
 
+	// History untuk chart momentum
+	const [history, setHistory] = useState<HistoryPointMomentum[]>([
+		initialHistory,
+	]);
+
 	// Ref untuk animasi (menghindari stale closure)
 	const ballARef = useRef<BallState>(initialBallAState);
 	const ballBRef = useRef<BallState>(initialBallBState);
+	const frameCountRef = useRef(0);
 
 	// Memoized values untuk data fisika
 	const physicsA = useMemo(() => calculatePhysics(ballA), [ballA]);
@@ -268,6 +123,8 @@ export function useMomentum(options: UseMomentumOptions) {
 		setBallB(newBallB);
 		ballARef.current = newBallA;
 		ballBRef.current = newBallB;
+		setHistory([initialHistory]);
+		frameCountRef.current = 0;
 	}, [canvasWidth, canvasHeight, initialBallA, initialBallB, ballAY, ballBY]);
 
 	/** Mengganti ke mode elastis (reset posisi bola) */
@@ -332,6 +189,31 @@ export function useMomentum(options: UseMomentumOptions) {
 		setBallA(nextA);
 		setBallB(nextB);
 
+		// Record history every ~60 frames (1 second at 60fps)
+		frameCountRef.current += 1;
+		if (frameCountRef.current % 10 === 0) {
+			const momentumA = nextA.mass * nextA.velocity;
+			const momentumB = nextB.mass * nextB.velocity;
+			const totalMomentum = momentumA + momentumB;
+			const kineticEnergyA = 0.5 * nextA.mass * nextA.velocity ** 2;
+			const kineticEnergyB = 0.5 * nextB.mass * nextB.velocity ** 2;
+			const totalKineticEnergy = kineticEnergyA + kineticEnergyB;
+			const time = frameCountRef.current / 10;
+
+			setHistory((prev) => [
+				...prev,
+				{
+					time,
+					momentumA,
+					momentumB,
+					totalMomentum,
+					kineticEnergyA,
+					kineticEnergyB,
+					totalKineticEnergy,
+				},
+			]);
+		}
+
 		// Auto-stop jika kedua bola sudah keluar canvas
 		if (
 			isOutOfBounds(nextA, canvasWidth) &&
@@ -388,6 +270,7 @@ export function useMomentum(options: UseMomentumOptions) {
 		physicsB,
 		totalMomentum,
 		totalKineticEnergy,
+		history,
 		start,
 		pause,
 		reset,
