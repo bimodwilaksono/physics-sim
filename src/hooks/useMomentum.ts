@@ -38,6 +38,10 @@ function checkCollision(ball1: BallState, ball2: BallState): boolean {
 	return distance <= minDistance;
 }
 
+function isOutOfBounds(ball: BallState, width: number): boolean {
+	return ball.x < -ball.radius || ball.x > width + ball.radius;
+}
+
 function resolveCollision(
 	ball1: BallState,
 	ball2: BallState,
@@ -142,10 +146,13 @@ export function useMomentum(options: UseMomentumOptions) {
 		initialBallB,
 		ballAY,
 		ballBY,
-	} = options;
+  } = options;
 
+	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [isRunning, setIsRunning] = useState(false);
-	const [isElastic, setIsElastic] = useState(true);
+  const [isElastic, setIsElastic] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+
 
 	const initialBallAState: BallState = {
 		...initialBallA,
@@ -203,7 +210,19 @@ export function useMomentum(options: UseMomentumOptions) {
 		setBallB(newBallB);
 		ballARef.current = newBallA;
 		ballBRef.current = newBallB;
-	}, [canvasWidth, canvasHeight, initialBallA, initialBallB, ballAY, ballBY]);
+  }, [canvasWidth, canvasHeight, initialBallA, initialBallB, ballAY, ballBY]);
+
+  const handleToggleElastic = useCallback(() => {
+    reset();
+    setIsElastic(true);
+  }, [])
+
+  const handleToggleInElastic = useCallback(() => {
+    reset();
+    setIsElastic(false);
+  }, [])
+
+
 
 	const updateBallA = useCallback((config: Partial<BallConfig>) => {
 		setBallA((prev) => {
@@ -253,6 +272,13 @@ export function useMomentum(options: UseMomentumOptions) {
 
 		setBallA(nextA);
 		setBallB(nextB);
+
+		if (
+			isOutOfBounds(nextA, canvasWidth) &&
+			isOutOfBounds(nextB, canvasWidth)
+		) {
+			setIsRunning(false);
+		}
 	}, [isElastic]);
 
 	useEffect(() => {
@@ -270,7 +296,23 @@ export function useMomentum(options: UseMomentumOptions) {
 		return () => {
 			cancelAnimationFrame(animationFrameId);
 		};
-	}, [isRunning, step]);
+  }, [isRunning, step]);
+
+
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
+
+	useEffect(() => {
+		if (!isClient) return;
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return;
+
+		draw(ctx);
+  }, [draw, isClient]);
 
 	return {
 		isRunning,
@@ -287,6 +329,10 @@ export function useMomentum(options: UseMomentumOptions) {
 		setBallA: updateBallA,
 		setBallB: updateBallB,
 		setIsElastic,
-		draw,
+    draw,
+    isClient,
+    canvasRef,
+    handleToggleElastic,
+    handleToggleInElastic,
 	};
 }
