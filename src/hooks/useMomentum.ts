@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export interface BallConfig {
 	mass: number;
@@ -187,32 +187,38 @@ export function useMomentum(options: UseMomentumOptions) {
 
 	const reset = useCallback(() => {
 		setIsRunning(false);
-		setBallA({
+		const newBallA = {
 			...initialBallA,
 			x: canvasWidth * 0.25,
 			y: ballAY ?? canvasHeight / 2,
 			color: BALL_A_COLOR,
-		});
-		setBallB({
+		};
+		const newBallB = {
 			...initialBallB,
 			x: canvasWidth * 0.75,
 			y: ballBY ?? canvasHeight / 2,
 			color: BALL_B_COLOR,
-		});
+		};
+		setBallA(newBallA);
+		setBallB(newBallB);
+		ballARef.current = newBallA;
+		ballBRef.current = newBallB;
 	}, [canvasWidth, canvasHeight, initialBallA, initialBallB, ballAY, ballBY]);
 
 	const updateBallA = useCallback((config: Partial<BallConfig>) => {
-		setBallA((prev) => ({
-			...prev,
-			...config,
-		}));
+		setBallA((prev) => {
+			const next = { ...prev, ...config };
+			ballARef.current = next;
+			return next;
+		});
 	}, []);
 
 	const updateBallB = useCallback((config: Partial<BallConfig>) => {
-		setBallB((prev) => ({
-			...prev,
-			...config,
-		}));
+		setBallB((prev) => {
+			const next = { ...prev, ...config };
+			ballBRef.current = next;
+			return next;
+		});
 	}, []);
 
 	const draw = useCallback(
@@ -225,28 +231,29 @@ export function useMomentum(options: UseMomentumOptions) {
 		[canvasWidth, canvasHeight, ballA, ballB],
 	);
 
+	const ballARef = useRef<BallState>(initialBallAState);
+	const ballBRef = useRef<BallState>(initialBallBState);
+
 	const step = useCallback(() => {
-		setBallA((prev) => ({
-			...prev,
-			x: prev.x + prev.velocity,
-		}));
-		setBallB((prev) => ({
-			...prev,
-			x: prev.x + prev.velocity,
-		}));
+		const nextA = {
+			...ballARef.current,
+			x: ballARef.current.x + ballARef.current.velocity,
+		};
+		const nextB = {
+			...ballBRef.current,
+			x: ballBRef.current.x + ballBRef.current.velocity,
+		};
 
-		setBallA((prevA) => {
-			const nextA = { ...prevA };
-			const nextB = { ...ballB };
+		if (checkCollision(nextA, nextB)) {
+			resolveCollision(nextA, nextB, isElastic);
+		}
 
-			if (checkCollision(nextA, nextB)) {
-				resolveCollision(nextA, nextB, isElastic);
-				setBallB(nextB);
-			}
+		ballARef.current = nextA;
+		ballBRef.current = nextB;
 
-			return nextA;
-		});
-	}, [ballB, isElastic]);
+		setBallA(nextA);
+		setBallB(nextB);
+	}, [isElastic]);
 
 	useEffect(() => {
 		if (!isRunning) return;
