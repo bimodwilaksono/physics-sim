@@ -26,8 +26,9 @@ export function isOutOfBounds(ball: BallState, width: number): boolean {
 
 /**
  * Menghitung kecepatan baru setelah tumbukan menggunakan hukum konservasi momentum
- * Untuk tumbukan elastis: menggunakan rumus standard
- * Untuk tumbukan tidak elastis: bola menyatu dengan kecepatan rata-rata
+ * - Tumbukan elastis (e=1): menggunakan rumus standard
+ * - Tumbukan tidak elastis sempurna (e=0): bola menyatu dengan kecepatan rata-rata tertimbang
+ * - Tumbukan tidak elastisparsial (0<e<1): kecepatan dikalikan koefisien restitusi
  * @param ball1 Bola pertama (velocity akan diubah)
  * @param ball2 Bola kedua (velocity akan diubah)
  * @param isElastic true untuk elastis, false untuk tidak elastis
@@ -47,13 +48,15 @@ export function resolveCollision(
 
 	const restitution = isElastic ? ELASTIC_RESTITUTION : INELASTIC_RESTITUTION;
 
-	ball1.velocity = v1Final * restitution;
-	ball2.velocity = v2Final * restitution;
-
-	if (!isElastic && restitution < 0.2) {
+	// Untuk tumbukan tidak elastis sempurna (restitution === 0),
+	// bola menyatu dan bergerak dengan kecepatan rata-rata tertimbang
+	if (restitution === 0) {
 		const combinedVelocity = (m1 * v1 + m2 * v2) / (m1 + m2);
 		ball1.velocity = combinedVelocity;
 		ball2.velocity = combinedVelocity;
+	} else {
+		ball1.velocity = v1Final * restitution;
+		ball2.velocity = v2Final * restitution;
 	}
 
 	const overlap = ball1.radius + ball2.radius - Math.abs(ball2.x - ball1.x);
