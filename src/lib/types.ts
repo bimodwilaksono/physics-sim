@@ -27,3 +27,14 @@ export interface UseMomentumOptions {
 	ballAY?: number;
 	ballBY?: number;
 }
+
+// Data Point for momentum and energy history
+export type HistoryPointMomentum = {
+	time: number;
+	momentumA: number;
+	momentumB: number;
+	totalMomentum: number;
+	kineticEnergyA: number;
+	kineticEnergyB: number;
+	totalKineticEnergy: number;
+};

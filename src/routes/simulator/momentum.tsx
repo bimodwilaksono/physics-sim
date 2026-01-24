@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/pixelact-ui/button";
+import { MomentumChart } from "@/components/momentum-chart";
+import {
+	Dialog,
+	DialogContent,
+	DialogTrigger,
+	DialogTitle,
+} from "@/components/ui/pixelact-ui/dialog";
 
 import "./style.css";
 import InfoRow from "@/components/ui/info-row";
@@ -12,14 +19,13 @@ export const Route = createFileRoute("/simulator/momentum")({
 });
 
 function RouteComponent() {
-
-  const {
-    handleToggleElastic,
-    handleToggleInElastic,
-    canvasRef,
-    isClient,
-    isElastic,
-    ...momentum
+	const {
+		handleToggleElastic,
+		handleToggleInElastic,
+		canvasRef,
+		isClient,
+		isElastic,
+		...momentum
 	} = useMomentum({
 		canvasWidth: 800,
 		canvasHeight: 350,
@@ -27,13 +33,10 @@ function RouteComponent() {
 		initialBallB: { mass: 15, velocity: -3, radius: 50 },
 	});
 
-
 	if (!isClient) {
 		return (
 			<Card className="momentum-simulator-container border-none shadow-none">
-				<h1 className="text-center text-white drop-shadow-lg">
-					Loading
-				</h1>
+				<h1 className="text-center text-white drop-shadow-lg">Loading</h1>
 				<div className="game-container">
 					<Card className="canvas-container">
 						<div className="w-[800px] h-[350px] bg-[#0a0a1a] rounded-lg animate-pulse" />
@@ -64,6 +67,24 @@ function RouteComponent() {
 			<div className="game-container">
 				<Card className="canvas-container">
 					<canvas ref={canvasRef} width="800" height="350"></canvas>
+
+					<div className="flex items-center gap-2 mt-2">
+						<Dialog>
+							<DialogTrigger asChild>
+								<Button variant="secondary" size="sm">
+									Show Chart
+								</Button>
+							</DialogTrigger>
+							<DialogContent className="max-w-5xl w-[90vw] max-h-[85vh] p-16 bg-[#0f0f1a] border-slate-700">
+								<DialogTitle className="text-xl text-center text-white mb-4">
+									Momentum Over Time
+								</DialogTitle>
+								<div className="h-[450px]">
+									<MomentumChart data={momentum.history} />
+								</div>
+							</DialogContent>
+						</Dialog>
+					</div>
 				</Card>
 
 				<Card className="controls-panel">
