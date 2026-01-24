@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/pixelact-ui/button";
 
 import "./style.css";
@@ -13,30 +12,51 @@ export const Route = createFileRoute("/simulator/momentum")({
 });
 
 function RouteComponent() {
-	const canvasRef = useRef<HTMLCanvasElement>(null);
 
-	const momentum = useMomentum({
+  const {
+    handleToggleElastic,
+    handleToggleInElastic,
+    canvasRef,
+    isClient,
+    isElastic,
+    ...momentum
+	} = useMomentum({
 		canvasWidth: 800,
 		canvasHeight: 350,
 		initialBallA: { mass: 10, velocity: 5, radius: 40 },
 		initialBallB: { mass: 15, velocity: -3, radius: 50 },
 	});
 
-	useEffect(() => {
-		const canvas = canvasRef.current;
-		if (!canvas) return;
 
-		const ctx = canvas.getContext("2d");
-		if (!ctx) return;
-
-		momentum.draw(ctx);
-	}, [momentum.draw]);
+	if (!isClient) {
+		return (
+			<Card className="momentum-simulator-container border-none shadow-none">
+				<h1 className="text-center text-white drop-shadow-lg">
+					Loading
+				</h1>
+				<div className="game-container">
+					<Card className="canvas-container">
+						<div className="w-[800px] h-[350px] bg-[#0a0a1a] rounded-lg animate-pulse" />
+					</Card>
+					<Card className="controls-panel">
+						<div className="flex flex-row flex-wrap">
+							<div className="h-10 w-20 bg-gray-700 rounded animate-pulse" />
+							<div className="h-10 w-20 bg-gray-700 rounded animate-pulse" />
+							<div className="h-10 w-20 bg-gray-700 rounded animate-pulse" />
+						</div>
+					</Card>
+				</div>
+			</Card>
+		);
+	}
 
 	return (
 		<>
-			<Card className="momentum-simulator-container border-none shadow-none">
-				<h1 className="text-center text-gray-600">Momentum Simulator</h1>
-				<p className="subtitle">
+			<Card className="momentum-simulator-container border-none shadow-none bg-transparent">
+				<h1 className="text-center text-white drop-shadow-lg">
+					Momentum Simulator
+				</h1>
+				<p className="subtitle text-gray-300">
 					Interactive physics simulation of elastic and inelastic collisions
 				</p>
 			</Card>
@@ -44,8 +64,6 @@ function RouteComponent() {
 			<div className="game-container">
 				<Card className="canvas-container">
 					<canvas ref={canvasRef} width="800" height="350"></canvas>
-
-					{/*Chart*/}
 				</Card>
 
 				<Card className="controls-panel">
@@ -54,14 +72,14 @@ function RouteComponent() {
 
 						<div className="mode-select">
 							<Button
-								className={`mode-btn ${momentum.isElastic ? "active" : ""}`}
-								onClick={() => momentum.setIsElastic(true)}
+								className={`mode-btn ${isElastic ? "active" : ""}`}
+								onClick={handleToggleElastic}
 							>
 								Elastic
 							</Button>
 							<Button
-								className={`mode-btn ${!momentum.isElastic ? "active" : ""}`}
-								onClick={() => momentum.setIsElastic(false)}
+								className={`mode-btn ${!isElastic ? "active" : ""}`}
+								onClick={handleToggleInElastic}
 							>
 								Inelastic
 							</Button>
